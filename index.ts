@@ -1,4 +1,6 @@
 import { Express, Request, Response } from "express";
+const routes = require("./routes/routes");
+const mongoose = require("mongoose");
 
 require("dotenv").config();
 
@@ -38,3 +40,5 @@ app.get("/", (req: Request, res: Response) => {
 app.listen(PORT, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${PORT}`);
 });
+
+app.use("", routes);
