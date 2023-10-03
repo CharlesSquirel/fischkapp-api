@@ -29,3 +29,20 @@ router.post("/cards", async (req: Request, res: Response) => {
     res.status(400).json({ message: error.message });
   }
 });
+
+//Update by ID Method
+router.put("/cards/:id", async (req: Request, res: Response) => {
+  try {
+    const id = req.params.id;
+    const updatedData = req.body;
+    const options = { new: true };
+    const existingData = await Model.findById(id);
+    if (!existingData) {
+      return res.status(404).json({ message: "Record with the provided ID does not exist." });
+    }
+    const result = await Model.findByIdAndUpdate(id, updatedData, options);
+    res.send(result);
+  } catch (err: any) {
+    res.status(400).json({ message: err.message });
+  }
+});
