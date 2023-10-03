@@ -3,5 +3,4 @@ export interface CreateCardPayload {
   back: string;
   tags: string[];
   author: string;
-  save?: () => {};
 }
