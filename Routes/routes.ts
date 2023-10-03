@@ -31,7 +31,7 @@ router.post("/cards", async (req: Request, res: Response) => {
 });
 
 //Update by ID Method
-router.patch("/cards/:id", async (req: Request, res: Response) => {
+router.put("/cards/:id", async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     const updatedData = req.body;
