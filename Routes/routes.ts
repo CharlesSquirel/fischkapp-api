@@ -48,7 +48,7 @@ router.put("/cards/:id", async (req: Request, res: Response) => {
 });
 
 //Delete by ID Method
-router.delete("/delete/:id", async (req: Request, res: Response) => {
+router.delete("/cards/:id", async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
     const data = await Model.findByIdAndDelete(id);
