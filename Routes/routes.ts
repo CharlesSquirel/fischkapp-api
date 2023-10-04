@@ -51,7 +51,7 @@ router.put("/cards/:id", async (req: Request, res: Response) => {
 router.delete("/cards/:id", async (req: Request, res: Response) => {
   try {
     const id = req.params.id;
-    const data = await Model.findByIdAndDelete(id);
+    const data = await Model.findById(id);
     if (!data) {
       return res.status(404).json({ message: "Card not found." });
     }
@@ -63,7 +63,8 @@ router.delete("/cards/:id", async (req: Request, res: Response) => {
         message: "It is not allowed to delete the card after 5 minutes of its creation.",
       });
     }
-    res.send(`Document with ${data.name} has been deleted..`);
+    await Model.findByIdAndDelete(id);
+    res.send(`Document with has been deleted..`);
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
