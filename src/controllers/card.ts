@@ -1,25 +1,39 @@
 import { RequestHandler } from "express";
+import createHttpError from "http-errors";
+import mongoose from "mongoose";
 const Model = require("../models/model");
 
-export const createCard: RequestHandler = async (req, res, next) => {
+interface CreateCardBody {
+  front?: string;
+  back?: string;
+  tags?: string[];
+  author?: string;
+}
+
+export const createCard: RequestHandler<unknown, unknown, CreateCardBody, unknown> = async (req, res, next) => {
+  const { front, back, tags, author } = req.body;
   try {
-    const id = req.params.id;
-    const updatedData = req.body;
-    const options = { new: true };
-    const existingData = await Model.findById(id);
-    if (!existingData) {
-      return res.status(404).json({ message: "Record with the provided ID does not exist." });
+    if (!front || !back || !tags || !author) {
+      throw createHttpError(400, "Lack of required datas");
     }
-    const result = await Model.findByIdAndUpdate(id, updatedData, options);
-    res.send(result);
-  } catch (err: any) {
-    res.status(400).json({ message: err.message });
+    const newCard = await Model.create({
+      front: front,
+      back: back,
+      tags: tags,
+      author: author,
+    });
+    res.status(201).json(newCard);
+  } catch (error) {
+    next(error);
   }
 };
 
 export const updateCard: RequestHandler = async (req, res, next) => {
+  const id = req.params.id;
   try {
-    const id = req.params.id;
+    if (!mongoose.isValidObjectId(id)) {
+      throw createHttpError(400, "Invalid card id");
+    }
     const updatedData = req.body;
     const options = { new: true };
     const existingData = await Model.findById(id);
@@ -33,9 +47,12 @@ export const updateCard: RequestHandler = async (req, res, next) => {
   }
 };
 
-export const deleteCard:RequestHandler = async (req, res, next) => {
+export const deleteCard: RequestHandler = async (req, res, next) => {
+  const id = req.params.id;
   try {
-    const id = req.params.id;
+    if (!mongoose.isValidObjectId(id)) {
+      throw createHttpError(400, "Invalid card id");
+    }
     const data = await Model.findById(id);
     if (!data) {
       return res.status(404).json({ message: "Card not found." });
@@ -53,4 +70,4 @@ export const deleteCard:RequestHandler = async (req, res, next) => {
   } catch (error: any) {
     res.status(400).json({ message: error.message });
   }
-}
+};
