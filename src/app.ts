@@ -4,10 +4,11 @@ import { Express, Request, Response } from "express";
 import router from "./routes/routes";
 import morgan from "morgan";
 import createHttpError, { isHttpError } from "http-errors";
+import env from "../util/validateEnv";
 const cors = require("cors");
 
 const corsOptions = {
-  origin: "http://localhost:400",
+  origin: env.CORS_ORIGIN,
   methods: "GET,PUT,POST,DELETE",
   credentials: true,
   optionsSuccessStatus: 204,
