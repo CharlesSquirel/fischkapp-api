@@ -1,7 +1,7 @@
 import { RequestHandler } from "express";
 import createHttpError from "http-errors";
 import mongoose from "mongoose";
-const Model = require("../models/model");
+import CardModel from "../models/model";
 
 interface ICardBody {
   front?: string;
@@ -24,7 +24,7 @@ interface UptadeCardParams {
 
 export const getCards: RequestHandler = async (req, res, next) => {
   try {
-    const cards = await Model.find().sort({ createdAt: 'desc' }).exec();
+    const cards = await CardModel.find().sort({ createdAt: 'desc' }).exec();
     if (!cards) {
       throw createHttpError(404, "Cards not found");
     }
@@ -38,7 +38,7 @@ export const getCards: RequestHandler = async (req, res, next) => {
 export const getCardsByAuthor: RequestHandler<AuthorParams, unknown, ICardBody, unknown> = async (req, res, next) => {
   const queryAuthor = req.params.author;
   try {
-    const cards = await Model.find({author: queryAuthor}).sort({ createdAt: 'desc' }).exec();
+    const cards = await CardModel.find({author: queryAuthor}).sort({ createdAt: 'desc' }).exec();
     if (!cards || cards.length === 0) {
         throw createHttpError(404, "Cards not found");
     }
@@ -51,7 +51,7 @@ export const getCardsByAuthor: RequestHandler<AuthorParams, unknown, ICardBody, 
 export const getCardsByTag: RequestHandler<TagsParams, unknown, ICardBody, unknown> = async (req,res,next) => {
   const queryTag = req.params.tag
   try {
-    const cards = await Model.find({ tags: queryTag }).sort({ createdAt: 'desc' }).exec();
+    const cards = await CardModel.find({ tags: queryTag }).sort({ createdAt: 'desc' }).exec();
     if (!cards || cards.length === 0) {
       throw createHttpError(404, "Cards not found");
   }
@@ -61,15 +61,13 @@ export const getCardsByTag: RequestHandler<TagsParams, unknown, ICardBody, unkno
   }
 }
 
-
-
 export const createCard: RequestHandler<unknown, unknown, ICardBody, unknown> = async (req, res, next) => {
   const { front, back, tags, author } = req.body;
   try {
     if (!front || !back || !tags || !author) {
       throw createHttpError(400, "Lack of required datas");
     }
-    const newCard = await Model.create({
+    const newCard = await CardModel.create({
       front: front,
       back: back,
       tags: tags,
@@ -80,8 +78,6 @@ export const createCard: RequestHandler<unknown, unknown, ICardBody, unknown> = 
     next(error);
   }
 };
-
-
 
 export const updateCard: RequestHandler<UptadeCardParams, unknown, ICardBody, unknown> = async (req, res, next) => {
   const id = req.params.id;
@@ -97,7 +93,7 @@ export const updateCard: RequestHandler<UptadeCardParams, unknown, ICardBody, un
     if (!newFront || !newBack || !newTags || !newAuthor) {
       throw createHttpError(400, "Lack of required datas");
     }
-    const card = Model.findById(id).exec();
+    const card = await CardModel.findById(id).exec();
     if (!card) {
       throw createHttpError(404, "Card not found");
     }
@@ -118,9 +114,9 @@ export const deleteCard: RequestHandler = async (req, res, next) => {
     if (!mongoose.isValidObjectId(id)) {
       throw createHttpError(400, "Invalid card id");
     }
-    const card = await Model.findById(id);
+    const card = await CardModel.findById(id);
     if (!card) {
-      throw createHttpError(404, "Card not found");
+      throw createHttpError(403, "Card not found");
     }
     const cardCreatedAt = new Date(card.createdAt).getTime();
     const currentTime = new Date().getTime();
@@ -128,7 +124,7 @@ export const deleteCard: RequestHandler = async (req, res, next) => {
     if (timeDifferenceMinutes > 5) {
       throw createHttpError(404, "It is not allowed to delete the card after 5 minutes of its creation.");
     }
-    await card.remove();
+    await card.deleteOne();
     res.sendStatus(204);
   } catch (error) {
     next(error);
