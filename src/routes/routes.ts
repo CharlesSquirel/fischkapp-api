@@ -1,8 +1,14 @@
-import { deleteCard, createCard, updateCard } from "../controllers/cardcontroller";
+import { deleteCard, createCard, updateCard, getCards, getCardsByAuthor, getCardsByTag } from "../controllers/cardcontroller";
 
 const express = require("express");
 
 const router = express.Router();
+
+router.get("/cards", getCards);
+
+router.get("/cards/author/:author", getCardsByAuthor)
+
+router.get("/cards/tags/:tag", getCardsByTag)
 
 router.post("/cards", createCard);
 
