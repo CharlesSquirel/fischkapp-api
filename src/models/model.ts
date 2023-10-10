@@ -1,3 +1,5 @@
+import { InferSchemaType, model } from "mongoose";
+
 const mongoose = require("mongoose");
 
 const dataSchema = new mongoose.Schema({
@@ -17,10 +19,8 @@ const dataSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+}, {timestamps: true});
 
-module.exports = mongoose.model("Data", dataSchema);
+type Card = InferSchemaType<typeof dataSchema>
+
+export default model<Card>("Card", dataSchema)
