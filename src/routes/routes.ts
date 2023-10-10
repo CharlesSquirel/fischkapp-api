@@ -1,4 +1,4 @@
-import { deleteCard, createCard, updateCard } from "../controllers/card";
+import { deleteCard, createCard, updateCard } from "../controllers/cardcontroller";
 
 const express = require("express");
 

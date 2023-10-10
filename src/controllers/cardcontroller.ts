@@ -28,22 +28,37 @@ export const createCard: RequestHandler<unknown, unknown, CreateCardBody, unknow
   }
 };
 
-export const updateCard: RequestHandler = async (req, res, next) => {
+interface UptadeCardParams {
+  id: string;
+}
+interface UptadeCardBody extends CreateCardBody {}
+
+export const updateCard: RequestHandler<UptadeCardParams, unknown, UptadeCardBody, unknown> = async (req, res, next) => {
   const id = req.params.id;
+  const newFront = req.body.front;
+  const newBack = req.body.back;
+  const newTags = req.body.tags;
+  const newAuthor = req.body.author;
+
   try {
     if (!mongoose.isValidObjectId(id)) {
       throw createHttpError(400, "Invalid card id");
     }
-    const updatedData = req.body;
-    const options = { new: true };
-    const existingData = await Model.findById(id);
-    if (!existingData) {
-      return res.status(404).json({ message: "Record with the provided ID does not exist." });
+    if (!newFront || !newBack || !newTags || !newAuthor) {
+      throw createHttpError(400, "Lack of required datas");
     }
-    const result = await Model.findByIdAndUpdate(id, updatedData, options);
-    res.send(result);
-  } catch (err: any) {
-    res.status(400).json({ message: err.message });
+    const card = Model.findById(id).exec();
+    if (!card) {
+      throw createHttpError(404, "Card not found");
+    }
+    card.front = newFront;
+    card.back = newBack;
+    card.tags = newTags;
+    card.author = newAuthor;
+    const uptadeCard = await card.save();
+    res.status(200).json(uptadeCard);
+  } catch (error) {
+    next(error);
   }
 };
 
@@ -53,21 +68,19 @@ export const deleteCard: RequestHandler = async (req, res, next) => {
     if (!mongoose.isValidObjectId(id)) {
       throw createHttpError(400, "Invalid card id");
     }
-    const data = await Model.findById(id);
-    if (!data) {
-      return res.status(404).json({ message: "Card not found." });
+    const card = await Model.findById(id);
+    if (!card) {
+      throw createHttpError(404, "Card not found");
     }
-    const cardCreatedAt = new Date(data.createdAt).getTime();
+    const cardCreatedAt = new Date(card.createdAt).getTime();
     const currentTime = new Date().getTime();
     const timeDifferenceMinutes = Math.floor((currentTime - cardCreatedAt) / (1000 * 60));
     if (timeDifferenceMinutes > 5) {
-      return res.status(400).json({
-        message: "It is not allowed to delete the card after 5 minutes of its creation.",
-      });
+      throw createHttpError(404, "It is not allowed to delete the card after 5 minutes of its creation.");
     }
-    await Model.findByIdAndDelete(id);
-    res.send(`Document with has been deleted..`);
-  } catch (error: any) {
-    res.status(400).json({ message: error.message });
+    await card.remove();
+    res.sendStatus(204);
+  } catch (error) {
+    next(error);
   }
 };
