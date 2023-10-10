@@ -24,7 +24,7 @@ interface UptadeCardParams {
 
 export const getCards: RequestHandler = async (req, res, next) => {
   try {
-    const cards = await Model.find().exec();
+    const cards = await Model.find().sort({ createdAt: 'desc' }).exec();
     if (!cards) {
       throw createHttpError(404, "Cards not found");
     }
@@ -38,7 +38,7 @@ export const getCards: RequestHandler = async (req, res, next) => {
 export const getCardsByAuthor: RequestHandler<AuthorParams, unknown, ICardBody, unknown> = async (req, res, next) => {
   const queryAuthor = req.params.author;
   try {
-    const cards = await Model.find({author: queryAuthor}).exec();
+    const cards = await Model.find({author: queryAuthor}).sort({ createdAt: 'desc' }).exec();
     if (!cards || cards.length === 0) {
         throw createHttpError(404, "Cards not found");
     }
@@ -51,7 +51,7 @@ export const getCardsByAuthor: RequestHandler<AuthorParams, unknown, ICardBody, 
 export const getCardsByTag: RequestHandler<TagsParams, unknown, ICardBody, unknown> = async (req,res,next) => {
   const queryTag = req.params.tag
   try {
-    const cards = await Model.find({ tags: queryTag }).exec();
+    const cards = await Model.find({ tags: queryTag }).sort({ createdAt: 'desc' }).exec();
     if (!cards || cards.length === 0) {
       throw createHttpError(404, "Cards not found");
   }
