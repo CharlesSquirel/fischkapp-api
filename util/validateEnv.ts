@@ -5,4 +5,5 @@ export default cleanEnv(process.env, {
   MONGODB_CONNECTION_STRING: str(),
   PORT: port(),
   CORS_ORIGIN: str(),
+  AUTHORIZATION_STRING: str()
 });
