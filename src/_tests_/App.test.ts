@@ -1,16 +1,18 @@
 const request = require("supertest");
 const app = require("./app");
 const mongoose = require("mongoose");
-require("dotenv").config();
-import env from "../../util/validateEnv";
 
-const port = env.PORT;
-const mongoStr = env.MONGODB_CONNECTION_STRING;
+import { MongoMemoryServer } from "mongodb-memory-server";
 
-beforeEach(async () => {
-  await mongoose.connect(mongoStr);
+let mongoServer: MongoMemoryServer;
+
+beforeAll(async () => {
+  mongoServer = new MongoMemoryServer();
+  const mongoUri = await mongoServer.getUri();
+  await mongoose.connect(mongoUri);
 });
 
-afterEach(async () => {
-  await mongoose.connection.close();
+afterAll(async () => {
+  await mongoose.disconnect();
+  await mongoServer.stop();
 });
