@@ -1,14 +1,15 @@
 const request = require("supertest");
-const app = require("./app");
+const app = require("../app");
 const mongoose = require("mongoose");
+require("dotenv").config();
 
 import { MongoMemoryServer } from "mongodb-memory-server";
 
 let mongoServer: MongoMemoryServer;
 
 beforeAll(async () => {
-  mongoServer = new MongoMemoryServer();
-  const mongoUri = await mongoServer.getUri();
+  mongoServer = await MongoMemoryServer.create();
+  const mongoUri = mongoServer.getUri();
   await mongoose.connect(mongoUri);
 });
 
