@@ -1,3 +1,3 @@
-it("test", () => {
-  console.log("tra");
-});
+const request = require("supertest");
+
+const app = require("./app");
