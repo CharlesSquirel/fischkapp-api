@@ -5,6 +5,9 @@ import router from "./routes/routes";
 import morgan from "morgan";
 import createHttpError, { isHttpError } from "http-errors";
 import env from "../util/validateEnv";
+const swaggerUi = require("swagger-ui-express");
+const swaggerJSDoc = require("swagger-jsdoc");
+const YAML = require("yamljs");
 const cors = require("cors");
 
 const corsOptions = {
@@ -16,6 +19,14 @@ const corsOptions = {
 };
 
 const app: Express = express();
+
+const swaggerDefinition = YAML.load("swagger-config.yaml");
+const options = {
+  swaggerDefinition,
+  apis: ["./routes/routes"],
+};
+const swaggerSpec = swaggerJSDoc(options);
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.use(cors(corsOptions));
 
