@@ -9,7 +9,7 @@
   "scripts": {
     "server": "node src/server.ts",
     "build": "npx tsc",
-    "start": "node src/server.js",
+    "start": "nodemon src/server.ts",
     "test": "jest"
   },
   "dependencies": {
