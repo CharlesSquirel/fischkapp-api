@@ -4,3 +4,175 @@ info:
   version: 1.0.0
 apis:
   - ./src/routes/routes
+servers:
+  -url: http://api.example.com/v1
+paths:
+  /cards:
+    get:
+      summary: Returns array of cards
+      security:
+        - BearerAuth: []
+    responses:
+      '200':
+      description: Successful operation
+      content:
+        application/json:
+          schema:
+            type: array
+              items: object
+                properties:
+                  front:
+                    type: string
+                    description: Text in first side of the card
+                  back:
+                    type: string
+                    description: Text in second side of the card
+                  tags:
+                    type: array
+                    items:
+                      type: string
+                    description: Tags related to the card
+                  author:
+                    type: string
+                    description: Author of the card
+        "404":
+        description: Cards not found
+        content:
+          application/json:
+            example:
+              error: "Cards not found"
+              details: "Cards not found in the database. Check database connection and make sure it is not empty"
+        "500"
+        description: Problem with the server
+    post:
+      summary: Post a new card
+      security:
+        - BearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+            properties:
+              front:
+                type: string
+                description: Text in first side of the card
+              back:
+                type: string
+                description: Text in second side of the card
+              tags:
+                type: array
+                  items:
+                    type: string
+                description: Tags related to the card
+              author:
+                type: string
+                description: Author of the card
+            required:
+              - front
+              - back
+              - tags
+              - author
+      responses:
+        "201":
+          description: Card created
+        "400":
+          description: Lack of required datas
+  
+  /cards/author/{author}:
+    get:
+      summary: Returns card filtered by author
+      parameters:
+        - name: author
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The author of the cards
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Cards not found
+
+  /cards/tags/{tag}:
+    get:
+      summary: Returns card containing tag
+      parameters:
+        - name: tag
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The tag located in the card
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Cards not found
+
+  /cards/{id}:
+    put:
+      summary: Update the card
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Card's ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                front:
+                  type: string
+                  description: Text in first side of the card
+                back:
+                  type: string
+                  description: Text in second side of the card
+                tags:
+                  type: array
+                  items:
+                    type: string
+                  description: Tags related to the card
+                author:
+                  type: string
+                  description:  Author of the card
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Successful operation
+        '404':
+          description: Card not found
+        "400":
+         description: Invalid card ID or lack of required datas
+    delete:
+      summary: Delete the card
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Card's ID
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Deleting succesfull
+        '403':
+          description: Card not found
+        '400':
+          description: Invalid card ID
+        '404':
+          description: It is not allowed to delete the card after 5 minutes of its creation.
+
+
