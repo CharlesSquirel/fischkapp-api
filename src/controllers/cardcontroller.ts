@@ -122,7 +122,7 @@ export const deleteCard: RequestHandler = async (req, res, next) => {
     const currentTime = new Date().getTime();
     const timeDifferenceMinutes = Math.floor((currentTime - cardCreatedAt) / (1000 * 60));
     if (timeDifferenceMinutes > 5) {
-      throw createHttpError(404, "It is not allowed to delete the card after 5 minutes of its creation.");
+      throw createHttpError(403, "It is not allowed to delete the card after 5 minutes of its creation.");
     }
     await card.deleteOne();
     res.sendStatus(204);
