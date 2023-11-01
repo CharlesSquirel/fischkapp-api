@@ -36,9 +36,14 @@ app.use(express.json());
 
 app.use("", router);
 
+app.get("/", (req, res) => {
+  res.send("Fischkap API");
+});
+
 app.use((req: Request, res: Response, next: NextFunction) => {
   next(createHttpError(404, "Endpoint not found"));
 });
+
 app.use((error: unknown, req: Request, res: Response, next: NextFunction) => {
   console.error(error);
   let errorMessage = "An unknown error occured";
