@@ -137,6 +137,8 @@ describe("testing delete card", () => {
     expect(responseDelete.status).toBe(204);
     const responseSecondDelete = await request(app).delete(`/cards/${cardToDeleteID}`).set("Authorization", `Bearer ${auth}`);
     expect(responseSecondDelete.status).toBe(403);
+    const responseGet = await request(app).get(`/cards/${cardToDeleteID}`).set("Authorization", `Bearer ${auth}`);
+    expect(responseGet.status).toBe(404);
   });
   it("not allowed delete after 5 minutes", async () => {
     const timeLimit = 300000;
@@ -148,5 +150,11 @@ describe("testing delete card", () => {
     const responseDelete = await request(app).delete(`/cards/${cardToDeleteID}`).set("Authorization", `Bearer ${auth}`);
     clock.restore();
     expect(responseDelete.status).toBe(403);
+  });
+
+  it("DELETE /cards/:id non-existent card", async () => {
+    const fakeID = "65495626ce798adfc7ecd3ad";
+    const responseDelete = await request(app).delete(`/cards/${fakeID}`).set("Authorization", `Bearer ${auth}`);
+    expect(responseDelete.status).toBe(404);
   });
 });

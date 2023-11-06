@@ -169,7 +169,9 @@ paths:
         '204':
           description: Deleting succesfull
         '403':
-          description: Card not found or It is not allowed to delete the card after 5 minutes of its creation
+          description: It is not allowed to delete the card after 5 minutes of its creation
         '400':
           description: Invalid card ID
+        "404":
+          description: Card not found
 

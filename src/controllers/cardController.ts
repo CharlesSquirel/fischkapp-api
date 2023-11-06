@@ -11,11 +11,11 @@ interface ICardBody {
 }
 
 interface AuthorParams {
-  author: string
+  author: string;
 }
 
 interface TagsParams {
-  tag: string
+  tag: string;
 }
 
 interface UptadeCardParams {
@@ -24,7 +24,7 @@ interface UptadeCardParams {
 
 export const getCards: RequestHandler = async (req, res, next) => {
   try {
-    const cards = await CardModel.find().sort({ createdAt: 'desc' }).exec();
+    const cards = await CardModel.find().sort({ createdAt: "desc" }).exec();
     if (!cards) {
       throw createHttpError(404, "Cards not found");
     }
@@ -34,13 +34,12 @@ export const getCards: RequestHandler = async (req, res, next) => {
   }
 };
 
-
 export const getCardsByAuthor: RequestHandler<AuthorParams, unknown, ICardBody, unknown> = async (req, res, next) => {
   const queryAuthor = req.params.author;
   try {
-    const cards = await CardModel.find({author: queryAuthor}).sort({ createdAt: 'desc' }).exec();
+    const cards = await CardModel.find({ author: queryAuthor }).sort({ createdAt: "desc" }).exec();
     if (!cards || cards.length === 0) {
-        throw createHttpError(404, "Cards not found");
+      throw createHttpError(404, "Cards not found");
     }
     res.status(200).json(cards);
   } catch (error) {
@@ -48,18 +47,18 @@ export const getCardsByAuthor: RequestHandler<AuthorParams, unknown, ICardBody, 
   }
 };
 
-export const getCardsByTag: RequestHandler<TagsParams, unknown, ICardBody, unknown> = async (req,res,next) => {
-  const queryTag = req.params.tag
+export const getCardsByTag: RequestHandler<TagsParams, unknown, ICardBody, unknown> = async (req, res, next) => {
+  const queryTag = req.params.tag;
   try {
-    const cards = await CardModel.find({ tags: queryTag }).sort({ createdAt: 'desc' }).exec();
+    const cards = await CardModel.find({ tags: queryTag }).sort({ createdAt: "desc" }).exec();
     if (!cards || cards.length === 0) {
       throw createHttpError(404, "Cards not found");
-  }
-  res.status(200).json(cards);
+    }
+    res.status(200).json(cards);
   } catch (error) {
     next(error);
   }
-}
+};
 
 export const createCard: RequestHandler<unknown, unknown, ICardBody, unknown> = async (req, res, next) => {
   const { front, back, tags, author } = req.body;
@@ -120,7 +119,7 @@ export const deleteCard: RequestHandler = async (req, res, next) => {
     }
     const card = await CardModel.findById(id);
     if (!card) {
-      throw createHttpError(403, "Card not found");
+      throw createHttpError(404, "Card not found");
     }
     const cardCreatedAt = new Date(card.createdAt).getTime();
     const currentTime = new Date().getTime();
