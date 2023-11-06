@@ -4,6 +4,7 @@ import env from "../../util/validateEnv";
 const request = require("supertest");
 const mongoose = require("mongoose");
 const _ = require("lodash");
+const sinon = require("sinon");
 require("dotenv").config();
 import CardModel from "../models/model";
 
@@ -75,54 +76,85 @@ describe("Test finding cards", () => {
 
     const author = "test author";
 
-    const responseGetByAuthor = await request(app).get(`/cards/author/${author}`).set("Authorization", `Bearer ${auth}`)
+    const responseGetByAuthor = await request(app).get(`/cards/author/${author}`).set("Authorization", `Bearer ${auth}`);
     const cardsByAuthor = responseGetByAuthor.body;
-    expect(responseGetByAuthor.status).toBe(200)
-    expect(cardsByAuthor.length).toBe(3)
+    expect(responseGetByAuthor.status).toBe(200);
+    expect(cardsByAuthor.length).toBe(3);
     for (const card of cardsByAuthor) {
-      expect(card).toHaveProperty("author", author)
+      expect(card).toHaveProperty("author", author);
     }
     const isDescending = _.isEqual(responseGetByAuthor.body, _.orderBy(responseGetByAuthor.body, [], ["desc"]));
     expect(isDescending).toBe(true);
 
-    const tag = "test tag"
+    const tag = "test tag";
 
-    const responseGetByTag = await request(app).get(`/cards/tags/${tag}`).set("Authorization", `Bearer ${auth}`)
+    const responseGetByTag = await request(app).get(`/cards/tags/${tag}`).set("Authorization", `Bearer ${auth}`);
     const cardsByTag = responseGetByTag.body;
     expect(responseGetByTag.status).toBe(200);
-    expect(cardsByTag.length).toBe(3)
+    expect(cardsByTag.length).toBe(3);
   });
 });
 
 describe("test creating card", () => {
   it("POST /cards", async () => {
-    const response = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1)
-    expect(response.status).toBe(201)
-    const card = response.body
-    expect(card.front).toBe(mockedPOST1.front)
-    expect(card.back).toBe(mockedPOST1.back)
-    expect(card.tags).toStrictEqual(mockedPOST1.tags)
-    expect(card.author).toBe(mockedPOST1.author)
-    const responseDuplicate = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1)
-    expect(responseDuplicate.status).toBe(400)
-  })
-})
+    const response = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1);
+    expect(response.status).toBe(201);
+    const card = response.body;
+    expect(card.front).toBe(mockedPOST1.front);
+    expect(card.back).toBe(mockedPOST1.back);
+    expect(card.tags).toStrictEqual(mockedPOST1.tags);
+    expect(card.author).toBe(mockedPOST1.author);
+    const responseDuplicate = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1);
+    expect(responseDuplicate.status).toBe(400);
+  });
+});
 
 describe("test editing card", () => {
   it("PUT /cards/:id", async () => {
-    const responsePost = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1)
-    expect(responsePost.status).toBe(201)
+    const responsePost = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1);
+    expect(responsePost.status).toBe(201);
     const newCardId = responsePost.body._id;
-    const newCard = {...mockedPOST1, front: "new front"}
-    const responsePUT = await request(app).put(`/cards/${newCardId}`).set("Authorization", `Bearer ${auth}`).send(newCard)
-    expect(responsePUT.status).toBe(200)
-    const responseGet = await request(app).get("/cards").set("Authorization", `Bearer ${auth}`)
-    const updatedCard = responseGet._body[0]
+    const newCard = { ...mockedPOST1, front: "new front" };
+    const responsePUT = await request(app).put(`/cards/${newCardId}`).set("Authorization", `Bearer ${auth}`).send(newCard);
+    expect(responsePUT.status).toBe(200);
+    const responseGet = await request(app).get("/cards").set("Authorization", `Bearer ${auth}`);
+    const updatedCard = responseGet._body[0];
     expect(responseGet.status).toBe(200);
-    expect(responseGet.body.length).toBe(1)
-    expect(updatedCard.front).toBe(newCard.front)
-    expect(updatedCard.back).toBe(newCard.back)
-    expect(updatedCard.tags).toStrictEqual(newCard.tags)
-    expect(updatedCard.author).toBe(newCard.author)
-  })
-})
+    expect(responseGet.body.length).toBe(1);
+    expect(updatedCard.front).toBe(newCard.front);
+    expect(updatedCard.back).toBe(newCard.back);
+    expect(updatedCard.tags).toStrictEqual(newCard.tags);
+    expect(updatedCard.author).toBe(newCard.author);
+  });
+});
+
+describe("testing delete card", () => {
+  it("DELETE /cards/:id", async () => {
+    const responsePost = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1);
+    expect(responsePost.status).toBe(201);
+    const cardToDeleteID = responsePost.body._id;
+    const responseDelete = await request(app).delete(`/cards/${cardToDeleteID}`).set("Authorization", `Bearer ${auth}`);
+    expect(responseDelete.status).toBe(204);
+    const responseSecondDelete = await request(app).delete(`/cards/${cardToDeleteID}`).set("Authorization", `Bearer ${auth}`);
+    expect(responseSecondDelete.status).toBe(403);
+    const responseGet = await request(app).get(`/cards/${cardToDeleteID}`).set("Authorization", `Bearer ${auth}`);
+    expect(responseGet.status).toBe(404);
+  });
+  it("not allowed delete after 5 minutes", async () => {
+    const timeLimit = 300000;
+    const clock = sinon.useFakeTimers();
+    const responsePost = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1);
+    expect(responsePost.status).toBe(201);
+    const cardToDeleteID = responsePost.body._id;
+    clock.tick(timeLimit + 1);
+    const responseDelete = await request(app).delete(`/cards/${cardToDeleteID}`).set("Authorization", `Bearer ${auth}`);
+    clock.restore();
+    expect(responseDelete.status).toBe(403);
+  });
+
+  it("DELETE /cards/:id non-existent card", async () => {
+    const fakeID = "65495626ce798adfc7ecd3ad";
+    const responseDelete = await request(app).delete(`/cards/${fakeID}`).set("Authorization", `Bearer ${auth}`);
+    expect(responseDelete.status).toBe(404);
+  });
+});

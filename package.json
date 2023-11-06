@@ -23,6 +23,7 @@
     "mongodb-memory-server": "^9.0.1",
     "mongoose": "^7.5.3",
     "morgan": "^1.10.0",
+    "sinon": "^17.0.1",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui": "^5.9.1",
     "swagger-ui-express": "^5.0.0",
