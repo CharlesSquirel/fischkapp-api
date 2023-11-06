@@ -77,7 +77,7 @@ paths:
         "201":
           description: Card created
         "400":
-          description: Lack of required datas
+          description: Lack of required datas or Card with the same 'front' already exists
   
   /cards/author/{author}:
     get:

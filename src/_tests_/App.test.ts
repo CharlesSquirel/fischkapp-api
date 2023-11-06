@@ -94,4 +94,16 @@ describe("Test finding cards", () => {
   });
 });
 
-
+describe("test editing card", () => {
+  it("POST /cards", async () => {
+    const response = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1)
+    expect(response.status).toBe(201)
+    const card = response.body
+    expect(card.front).toBe(mockedPOST1.front)
+    expect(card.back).toBe(mockedPOST1.back)
+    expect(card.tags).toStrictEqual(mockedPOST1.tags)
+    expect(card.author).toBe(mockedPOST1.author)
+    const responseDuplicate = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1)
+    expect(responseDuplicate.status).toBe(400)
+  })
+})
