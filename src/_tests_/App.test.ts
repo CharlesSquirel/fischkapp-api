@@ -94,7 +94,7 @@ describe("Test finding cards", () => {
   });
 });
 
-describe("test editing card", () => {
+describe("test creating card", () => {
   it("POST /cards", async () => {
     const response = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1)
     expect(response.status).toBe(201)
@@ -105,5 +105,24 @@ describe("test editing card", () => {
     expect(card.author).toBe(mockedPOST1.author)
     const responseDuplicate = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1)
     expect(responseDuplicate.status).toBe(400)
+  })
+})
+
+describe("test editing card", () => {
+  it("PUT /cards/:id", async () => {
+    const responsePost = await request(app).post("/cards").set("Authorization", `Bearer ${auth}`).send(mockedPOST1)
+    expect(responsePost.status).toBe(201)
+    const newCardId = responsePost.body._id;
+    const newCard = {...mockedPOST1, front: "new front"}
+    const responsePUT = await request(app).put(`/cards/${newCardId}`).set("Authorization", `Bearer ${auth}`).send(newCard)
+    expect(responsePUT.status).toBe(200)
+    const responseGet = await request(app).get("/cards").set("Authorization", `Bearer ${auth}`)
+    const updatedCard = responseGet._body[0]
+    expect(responseGet.status).toBe(200);
+    expect(responseGet.body.length).toBe(1)
+    expect(updatedCard.front).toBe(newCard.front)
+    expect(updatedCard.back).toBe(newCard.back)
+    expect(updatedCard.tags).toStrictEqual(newCard.tags)
+    expect(updatedCard.author).toBe(newCard.author)
   })
 })
