@@ -67,6 +67,10 @@ export const createCard: RequestHandler<unknown, unknown, ICardBody, unknown> = 
     if (!front || !back || !tags || !author) {
       throw createHttpError(400, "Lack of required datas");
     }
+    const existingCard = await CardModel.findOne({ front });
+    if (existingCard) {
+      throw createHttpError(400, "Card with the same 'front' already exists");
+    }
     const newCard = await CardModel.create({
       front: front,
       back: back,
